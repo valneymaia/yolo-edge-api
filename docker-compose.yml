@@ -1,7 +1,7 @@
 services:
- yolo-api:
+  yolo-api:
     image: ghcr.io/valneymaia/yolo-edge-api/yolo-api:latest
-   build:
+    build:
       context: .
       dockerfile: Dockerfile.api
     container_name: yolo-api
@@ -42,8 +42,32 @@ services:
       yolo-api:
         condition: service_healthy
 
+  yolo-stream:
+    build:
+      context: .
+      dockerfile: Dockerfile.api    # reutiliza a mesma base ARM64
+    container_name: yolo-stream
+    ports:
+      - "5000:5000"
+    privileged: true              # mesmo acesso à câmera do yolo-api
+    volumes:
+      - ./stream:/app/stream        # código do módulo de streaming
+      - ./models:/app/models:ro     # pesos do modelo (read-only)
+      - /dev:/dev                   # dispositivos de hardware do host
+      - /run/udev:/run/udev:ro      # permite ao libcamera identificar o sensor via udev
+    environment:
+      - MODEL_NAME=yolov8n.pt
+    command: >
+      python3 stream/mjpeg_server.py
+      --device 0
+      --infer-every 3
+      --infer-size 320
+      --port 5000
+    restart: unless-stopped
+    depends_on:
+      - yolo-api
+
 
 networks:
   yolo-net:
     driver: bridge
-
