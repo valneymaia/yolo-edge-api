@@ -133,8 +133,8 @@ class RealtimeDetector:
         self.conf        = conf
         self.infer_every = infer_every
         self.infer_size  = infer_size
-	from preprocessing.preprocessor import Preprocessor, PreprocessConfig
-	self.preprocessor = Preprocessor(PreprocessConfig(infer_size=infer_size))
+        from preprocessing.preprocessor import Preprocessor, PreprocessConfig
+        self.preprocessor = Preprocessor(PreprocessConfig(infer_size=infer_size))
 
 
         self._frame_idx   = 0
